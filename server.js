@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth'); // Rutas para admin
 const userRoutes = require('./routes/user'); // Rutas para usuarios
+const creditRoutes = require('./routes/credit'); // Asegúrate de que esta es la única ruta para creditos
 
 const app = express();
 app.use(cors());
@@ -20,7 +21,9 @@ mongoose.connect(MONGODB_URI, {
 
 // Rutas
 app.use('/api/admin', authRoutes); // Ruta para las operaciones de admin
-app.use('/api/user', userRoutes);
+app.use('/api/user', userRoutes); // Ruta para las operaciones de user
+app.use('/api/credit', creditRoutes);
+
 
 app.get('/', (req, res) => {
     res.send('API de la aplicación contable online');
