@@ -6,11 +6,11 @@ const Credit = require('../models/Credit'); // Importar el modelo de crédito
 // Crear un nuevo crédito para un usuario
 router.post('/:identificationNumber/add-credit', async (req, res) => {
     const { identificationNumber } = req.params; // Obtener el número de identificación de los parámetros
-    const { loanAmount, interestRate } = req.body; // Obtener los datos del crédito del cuerpo de la solicitud
+    const { loanAmount, interestRate, installments } = req.body; // Obtener los datos del crédito del cuerpo de la solicitud
 
-    // Verifica si los campos loanAmount e interestRate están presentes y son válidos
-    if (typeof loanAmount !== 'number' || typeof interestRate !== 'number') {
-        return res.status(400).json({ message: 'Faltan campos requeridos: loanAmount, interestRate' });
+    // Verifica si los campos loanAmount, interestRate e installments están presentes y son válidos
+    if (typeof loanAmount !== 'number' || typeof interestRate !== 'number' || typeof installments !== 'number') {
+        return res.status(400).json({ message: 'Faltan campos requeridos: loanAmount, interestRate, installments' });
     }
 
     try {
@@ -25,6 +25,7 @@ router.post('/:identificationNumber/add-credit', async (req, res) => {
             user: user._id, // Guardar la referencia al usuario
             loanAmount,
             interestRate,
+            installments,
         });
 
         // Guardar el nuevo crédito

@@ -15,6 +15,10 @@ const CreditSchema = new Schema({
         type: Number,
         required: true,
     },
+    installments: {
+        type: Number,
+        required: true, // Asegura que el campo de cuotas sea obligatorio
+    },
     dateIssued: {
         type: Date,
         default: Date.now,
