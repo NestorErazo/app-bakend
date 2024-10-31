@@ -5,39 +5,84 @@ const Credit = require('../models/Credit'); // Importar el modelo de crédito
 
 // Crear un nuevo crédito para un usuario
 router.post('/:identificationNumber/add-credit', async (req, res) => {
-    const { identificationNumber } = req.params; // Obtener el número de identificación de los parámetros
-    const { loanAmount, interestRate, installments } = req.body; // Obtener los datos del crédito del cuerpo de la solicitud
+    const { identificationNumber } = req.params;
+    const { loanAmount, interestRate, installments } = req.body;
 
-    // Verifica si los campos loanAmount, interestRate e installments están presentes y son válidos
+    // Verificación de campos
     if (typeof loanAmount !== 'number' || typeof interestRate !== 'number' || typeof installments !== 'number') {
         return res.status(400).json({ message: 'Faltan campos requeridos: loanAmount, interestRate, installments' });
     }
 
     try {
-        // Busca el usuario por el número de identificación
         const user = await User.findOne({ identificationNumber });
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        // Crear el nuevo crédito
         const newCredit = new Credit({
-            user: user._id, // Guardar la referencia al usuario
+            user: user._id,
             loanAmount,
             interestRate,
             installments,
         });
 
-        // Guardar el nuevo crédito
         await newCredit.save();
 
-        // Agregar el nuevo crédito al usuario
         user.credits.push(newCredit._id);
         await user.save();
 
         res.status(201).json({ message: 'Crédito añadido exitosamente', credit: newCredit });
     } catch (error) {
         console.error('Error al añadir crédito:', error);
+        res.status(500).json({ message: 'Error en el servidor', error });
+    }
+});
+
+// Ruta para obtener créditos de un usuario por identificación
+router.get('/:identificationNumber/credits', async (req, res) => {
+    const { identificationNumber } = req.params;
+
+    try {
+        const userCredits = await User.aggregate([
+            { $match: { identificationNumber: identificationNumber } },
+            {
+                $lookup: {
+                    from: 'credits',
+                    localField: 'credits',
+                    foreignField: '_id',
+                    as: 'credits'
+                }
+            },
+            {
+                $project: {
+                    identificationNumber: 1,
+                    fullName: 1,
+                    "credits.loanAmount": 1,
+                    "credits.interestRate": 1,
+                    "credits.installments": 1,
+                    "credits.remainingInstallments": {
+                        $map: {
+                            input: "$credits",
+                            as: "credit",
+                            in: { 
+                                $subtract: [
+                                    "$$credit.installments", 
+                                    { $ifNull: [{ $size: { $ifNull: ["$$credit.payments", []] } }, 0] }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        if (!userCredits || userCredits.length === 0) {
+            return res.status(404).json({ message: 'Usuario o créditos no encontrados' });
+        }
+
+        res.status(200).json(userCredits[0]);
+    } catch (error) {
+        console.error('Error al obtener créditos:', error);
         res.status(500).json({ message: 'Error en el servidor', error });
     }
 });

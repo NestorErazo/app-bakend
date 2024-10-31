@@ -43,6 +43,15 @@ router.delete('/users/:id', async (req, res) => {
     }
 });
 
-
+// Ruta para obtener los números de identificación de todos los usuarios
+router.get('/identifications', async (req, res) => {
+    try {
+        const users = await User.find({}, 'identificationNumber fullName');
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error al obtener identificaciones:', error);
+        res.status(500).json({ message: 'Error en el servidor', error });
+    }
+});
 
 module.exports = router;

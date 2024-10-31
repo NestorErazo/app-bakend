@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const CreditSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'User', // Relación con el modelo de usuario
+        ref: 'User',
         required: true,
     },
     loanAmount: {
@@ -17,8 +17,14 @@ const CreditSchema = new Schema({
     },
     installments: {
         type: Number,
-        required: true, // Asegura que el campo de cuotas sea obligatorio
+        required: true,
     },
+    payments: [
+        {
+            amount: { type: Number },
+            date: { type: Date, default: Date.now },
+        },
+    ],
     dateIssued: {
         type: Date,
         default: Date.now,
