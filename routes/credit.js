@@ -87,4 +87,31 @@ router.get('/:identificationNumber/credits', async (req, res) => {
     }
 });
 
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedUser || !loanAmount || !interestRate || !installments) {
+        alert('Faltan campos requeridos');
+        return;
+    }
+
+    try {
+        const response = await axios.post(`https://app-bakend.onrender.com/api/credit/${selectedUser.identificationNumber}/add-credit`, {
+            loanAmount: parseFloat(loanAmount),
+            interestRate: parseFloat(interestRate),
+            installments: parseInt(installments),
+        });
+        alert(response.data.message);
+        
+        // Limpiar campos después de añadir crédito
+        setLoanAmount('');
+        setInterestRate('');
+        setInstallments('');
+    } catch (error) {
+        console.error('Error adding credit:', error);
+        alert('Error al añadir el crédito');
+    }
+};
+
+
+
 module.exports = router;
