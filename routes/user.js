@@ -1,6 +1,5 @@
 const express = require('express');
 const User = require('../models/User'); // Asegúrate de que la ruta sea correcta
-
 const router = express.Router();
 
 // Crear un nuevo usuario
@@ -29,15 +28,15 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Eliminar un usuarios
+// Eliminar un usuario
 router.delete('/users/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const user = await User.findByIdAndDelete(id);
         if (!user) {
-            return res.status(404).json({ message: 'usuario no encontrado' });
+            return res.status(404).json({ message: 'Usuario no encontrado' });
         }
-        res.json({ message: 'usuario eliminado correctamente' });
+        res.json({ message: 'Usuario eliminado correctamente' });
     } catch (error) {
         res.status(500).json({ message: 'Error en el servidor' });
     }
@@ -53,5 +52,6 @@ router.get('/identifications', async (req, res) => {
         res.status(500).json({ message: 'Error en el servidor', error });
     }
 });
+
 
 module.exports = router;

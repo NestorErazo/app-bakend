@@ -22,7 +22,8 @@ mongoose.connect(MONGODB_URI, {
 // Rutas
 app.use('/api/admin', authRoutes); // Ruta para las operaciones de admin
 app.use('/api/user', userRoutes); // Ruta para las operaciones de user
-app.use('/api/credit', creditRoutes);
+app.use('/api/credit', creditRoutes);// Ruta para manejar créditos
+
 
 
 app.get('/', (req, res) => {

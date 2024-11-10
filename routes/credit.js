@@ -57,6 +57,7 @@ router.get('/:identificationNumber/credits', async (req, res) => {
                 $project: {
                     identificationNumber: 1,
                     fullName: 1,
+                    "credits._id": 1,  // Incluir el _id de los créditos
                     "credits.loanAmount": 1,
                     "credits.interestRate": 1,
                     "credits.installments": 1,
@@ -87,6 +88,7 @@ router.get('/:identificationNumber/credits', async (req, res) => {
     }
 });
 
+
 const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedUser || !loanAmount || !interestRate || !installments) {
@@ -111,6 +113,59 @@ const handleSubmit = async (e) => {
         alert('Error al añadir el crédito');
     }
 };
+
+// Ruta para abonar a un crédito
+router.patch('/:creditId/payment', async (req, res) => {
+    const { creditId } = req.params;
+    const { amount } = req.body;
+
+    if (typeof amount !== 'number' || amount <= 0) {
+        return res.status(400).json({ message: 'El monto del abono debe ser un número positivo' });
+    }
+
+    try {
+        const credit = await Credit.findById(creditId);
+        if (!credit) {
+            return res.status(404).json({ message: 'Crédito no encontrado' });
+        }
+
+        // Agregar el pago al array de pagos
+        credit.payments.push({ amount, date: new Date() });
+
+        // Actualizar el monto restante
+        credit.loanAmount -= amount;
+
+        // Guardar el crédito actualizado
+        await credit.save();
+
+        res.status(200).json({
+            message: 'Abono realizado con éxito',
+            credit
+        });
+    } catch (error) {
+        console.error('Error al realizar el abono:', error);
+        res.status(500).json({ message: 'Error en el servidor', error });
+    }
+});
+
+
+router.get('/:creditId', async (req, res) => {
+    const { creditId } = req.params;
+
+    try {
+        const credit = await Credit.findById(creditId);
+        if (!credit) {
+            return res.status(404).json({ message: 'Crédito no encontrado' });
+        }
+
+        res.status(200).json(credit);
+    } catch (error) {
+        console.error('Error al obtener el crédito:', error);
+        res.status(500).json({ message: 'Error en el servidor', error });
+    }
+});
+
+
 
 
 
